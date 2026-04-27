@@ -18,7 +18,7 @@
 * **Open Source:** Licensed under MIT for community growth.
 
 ### Installation
-1.  Go to the [Releases](https://github.com/YasithPraharshana/W-Studio-Todo-LM/releases) page.
+1.  Go to the [Releases](https://github.com/YasithPraharshana/W-Studio-Todo-LM/tags) page.
 2.  Download `WStudio_Todo_LM_Setup.exe`.
 3.  Run the installer and follow the setup wizard.
 
@@ -39,7 +39,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 * **විවෘත මූලාශ්‍ර:** MIT බලපත්‍රය යටතේ ඕනෑම අයෙකුට භාවිත කළ හැක.
 
 ### ස්ථාපනය කරන ආකාරය
-1.  [Releases](https://github.com/YasithPraharshana/W-Studio-Todo-LM/releases) පිටුවට පිවිසෙන්න.
+1.  [Releases](https://github.com/YasithPraharshana/W-Studio-Todo-LM/tags) පිටුවට පිවිසෙන්න.
 2.  `WStudio_Todo_LM_Setup.exe` ගොනුව බාගත (Download) කරගන්න.
 3.  එම ගොනුව විවෘත කර ස්ථාපනය (Install) කරගන්න.
 
