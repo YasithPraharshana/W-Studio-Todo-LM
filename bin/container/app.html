@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>W-Studio | Todo LM - Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+	<link rel="icon" href="resource/icon.ico">
+    <style>
+        :root {
+            --bg:       #080a0f;
+            --surface:  #0e1117;
+            --card:     #111520;
+            --border:   #1c2030;
+            --accent:   #00d2b4;
+            --accent2:  #5078ff;
+            --danger:   #ff3c5a;
+            --success:  #00e896;
+            --warn:     #ffb340;
+            --text-hi:  #eef0f6;
+            --text-mid: #8890aa;
+            --text-dim: #3a4060;
+            --mono:     'JetBrains Mono', monospace;
+            --sans:     'Outfit', sans-serif;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text-hi);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ─── Grid noise background ───────────────────────────────────── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0,210,180,.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,210,180,.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ─── Glow orb ───────────────────────────────────────────────── */
+        body::after {
+            content: '';
+            position: fixed;
+            top: -200px; left: -200px;
+            width: 700px; height: 700px;
+            background: radial-gradient(circle, rgba(0,210,180,.06) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ─── Top Bar ─────────────────────────────────────────────────── */
+        .topbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(8,10,15,.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center;
+            padding: 0 32px; height: 58px; gap: 20px;
+        }
+
+        .logo {
+            font-family: var(--mono);
+            font-size: 15px; font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 2px;
+            flex-shrink: 0;
+        }
+
+        .logo span { color: var(--text-dim); }
+
+        .topbar-sep { width: 1px; height: 22px; background: var(--border); }
+		
+        .page-label { font-family: var(--mono); font-size: 11px;
+            letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; }
+
+        .topbar-status {
+            display: flex; align-items: center; gap: 8px;
+            font-family: var(--mono); font-size: 11px;
+            color: var(--text-mid);
+        }
+
+        .dot-live {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: .4; }
+        }
+
+        .topbar-right {
+            margin-left: auto; display: flex; align-items: center; gap: 12px;
+        }
+
+        .btn-nav {
+            font-family: var(--sans); font-size: 13px; font-weight: 600;
+            color: var(--text-mid); text-decoration: none;
+            padding: 7px 16px; border-radius: 6px; border: 1px solid var(--border);
+            transition: all .2s; background: transparent;
+            cursor: pointer;
+        }
+        .btn-nav:hover { color: var(--accent); border-color: var(--accent); background: rgba(0,210,180,.06); }
+
+        .btn-primary {
+            font-family: var(--sans); font-size: 13px; font-weight: 700;
+            color: #080a0f; background: var(--accent);
+            padding: 7px 20px; border-radius: 6px; border: none;
+            text-decoration: none; cursor: pointer;
+            transition: all .2s;
+            letter-spacing: .3px;
+        }
+        .btn-primary:hover { background: #00eed0; transform: translateY(-1px); }
+
+        /* ─── Main Layout ──────────────────────────────────────────────── */
+        .page { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding: 40px 24px 80px; }
+
+        /* ─── Hero ────────────────────────────────────────────────────── */
+        .hero { margin-bottom: 48px; }
+
+        .hero-eyebrow {
+            font-family: var(--mono); font-size: 11px;
+            color: var(--accent); letter-spacing: 3px;
+            text-transform: uppercase; margin-bottom: 14px;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .hero-eyebrow::before {
+            content: ''; width: 28px; height: 1px; background: var(--accent);
+        }
+
+        .hero h1 {
+            font-size: clamp(28px, 5vw, 46px);
+            font-weight: 700; line-height: 1.15;
+            letter-spacing: -.5px;
+            color: var(--text-hi);
+        }
+
+        .hero h1 em {
+            font-style: normal;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-sub {
+            margin-top: 12px; font-size: 15px; color: var(--text-mid);
+            max-width: 520px; line-height: 1.7; font-weight: 300;
+        }
+
+        /* ─── Stat Cards ──────────────────────────────────────────────── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px; margin-bottom: 40px;
+        }
+
+        @media (max-width: 720px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px; padding: 20px 22px;
+            position: relative; overflow: hidden;
+            transition: border-color .2s;
+        }
+
+        .stat-card:hover { border-color: rgba(0,210,180,.25); }
+
+        .stat-card::before {
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+        }
+
+        .stat-card.c1::before { background: var(--accent); }
+        .stat-card.c2::before { background: var(--success); }
+        .stat-card.c3::before { background: var(--danger); }
+        .stat-card.c4::before { background: var(--warn); }
+
+        .stat-label {
+            font-family: var(--mono); font-size: 10px;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: var(--text-dim); margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-family: var(--mono); font-size: 34px;
+            font-weight: 700; line-height: 1;
+            color: var(--text-hi);
+        }
+
+        .stat-card.c1 .stat-value { color: var(--accent); }
+        .stat-card.c2 .stat-value { color: var(--success); }
+        .stat-card.c3 .stat-value { color: var(--danger); }
+        .stat-card.c4 .stat-value { color: var(--warn); }
+
+        .stat-sub {
+            margin-top: 6px; font-size: 12px; color: var(--text-dim);
+        }
+
+        /* ─── Two-col layout ──────────────────────────────────────────── */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 24px; align-items: start;
+        }
+
+        @media (max-width: 860px) { .grid-2 { grid-template-columns: 1fr; } }
+
+        /* ─── Panel ───────────────────────────────────────────────────── */
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px; overflow: hidden;
+        }
+
+        .panel-head {
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .panel-title {
+            font-family: var(--mono); font-size: 11px;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        .panel-link {
+            font-size: 12px; color: var(--text-dim);
+            text-decoration: none; transition: color .2s;
+        }
+        .panel-link:hover { color: var(--accent); }
+
+        /* ─── Task Preview List ───────────────────────────────────────── */
+        .task-preview-list { padding: 8px 0; }
+
+        .task-row {
+            display: grid;
+            grid-template-columns: 8px 1fr auto;
+            gap: 14px; align-items: center;
+            padding: 13px 22px;
+            border-bottom: 1px solid var(--border);
+            transition: background .15s;
+        }
+
+        .task-row:last-child { border-bottom: none; }
+        .task-row:hover { background: rgba(255,255,255,.02); }
+
+        .task-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .dot-active   { background: var(--accent); }
+        .dot-complete { background: var(--success); }
+        .dot-expired  { background: var(--danger); }
+        .dot-ignore   { background: var(--text-dim); }
+
+        .task-row-title {
+            font-size: 13px; font-weight: 500; color: var(--text-hi);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        .task-row-meta {
+            font-family: var(--mono); font-size: 10px;
+            color: var(--text-dim); white-space: nowrap;
+        }
+
+        .empty-state {
+            padding: 40px 22px; text-align: center;
+            color: var(--text-dim); font-size: 13px;
+        }
+
+        /* ─── Quick Actions ───────────────────────────────────────────── */
+        .action-list { padding: 10px 0; }
+
+        .action-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 22px; text-decoration: none;
+            border-bottom: 1px solid var(--border);
+            transition: background .15s; cursor: pointer;
+        }
+
+        .action-item:last-child { border-bottom: none; }
+        .action-item:hover { background: rgba(255,255,255,.03); }
+
+        .action-icon {
+            width: 36px; height: 36px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; flex-shrink: 0;
+        }
+
+        .action-icon.teal   { background: rgba(0,210,180,.1);  }
+        .action-icon.blue   { background: rgba(80,120,255,.1); }
+        .action-icon.red    { background: rgba(255,60,90,.1);  }
+        .action-icon.amber  { background: rgba(255,179,64,.1); }
+
+        .action-text strong {
+            display: block; font-size: 13px; font-weight: 600;
+            color: var(--text-hi);
+        }
+
+        .action-text span {
+            font-size: 11px; color: var(--text-dim);
+        }
+
+        .action-arrow {
+            margin-left: auto; color: var(--text-dim);
+            font-size: 16px; transition: transform .2s, color .2s;
+        }
+
+        .action-item:hover .action-arrow { transform: translateX(3px); color: var(--accent); }
+
+        /* ─── Server Info Panel ───────────────────────────────────────── */
+        .info-grid { padding: 6px 0; }
+
+        .info-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 11px 22px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .info-row:last-child { border-bottom: none; }
+
+        .info-key {
+            font-family: var(--mono); font-size: 10px;
+            letter-spacing: 1px; text-transform: uppercase;
+            color: var(--text-dim);
+        }
+
+        .info-val {
+            font-family: var(--mono); font-size: 12px;
+            color: var(--text-mid);
+        }
+
+        .badge-sm {
+            font-family: var(--mono); font-size: 10px;
+            padding: 3px 8px; border-radius: 4px; font-weight: 700;
+        }
+
+        .badge-online { background: rgba(0,232,150,.1); color: var(--success); }
+
+        /* ─── Footer ──────────────────────────────────────────────────── */
+        .footer {
+            text-align: center; margin-top: 60px;
+            font-family: var(--mono); font-size: 11px;
+            color: var(--text-dim); letter-spacing: 1px;
+        }
+
+        /* ─── Fade-in animation ───────────────────────────────────────── */
+        .fade-up {
+            opacity: 0; transform: translateY(16px);
+            animation: fadeUp .5s ease forwards;
+        }
+
+        .fade-up:nth-child(1) { animation-delay: .05s; }
+        .fade-up:nth-child(2) { animation-delay: .1s; }
+        .fade-up:nth-child(3) { animation-delay: .15s; }
+        .fade-up:nth-child(4) { animation-delay: .2s; }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="topbar">
+        <div class="logo">W<span>-</span>STUDIO</div>
+        <div class="topbar-sep"></div>
+        <span class="page-label">Todo LM</span>
+        <div class="topbar-status">
+            <span class="dot-live"></span>
+            SERVER ACTIVE &nbsp;·&nbsp; localhost:8080
+        </div>
+        <div class="topbar-right">
+            <a href="/outdated" class="btn-nav">Expired</a>
+            <a href="/archive" class="btn-nav">Archive</a>
+            <a href="/program.html" class="btn-primary">Open Tasks →</a>
+        </div>
+    </nav>
+
+    <div class="page">
+
+        <!-- Hero -->
+        <div class="hero">
+            <div class="hero-eyebrow">W-Studio Todo LM Dashboard</div>
+            <h1>Your personal<br><em>Todo List Management command centre.</em></h1>
+            <p class="hero-sub">A lightweight C++ HTTP server running locally. Manage tasks, track deadlines, and stay organised — all from your browser.</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row" id="statsRow">
+            <div class="stat-card c1 fade-up">
+                <div class="stat-label">Total Tasks</div>
+                <div class="stat-value" id="sTotal">—</div>
+                <div class="stat-sub">in database</div>
+            </div>
+            <div class="stat-card c2 fade-up">
+                <div class="stat-label">Complete</div>
+                <div class="stat-value" id="sComplete">—</div>
+                <div class="stat-sub">finished</div>
+            </div>
+            <div class="stat-card c3 fade-up">
+                <div class="stat-label">Expired</div>
+                <div class="stat-value" id="sExpired">—</div>
+                <div class="stat-sub">past deadline</div>
+            </div>
+            <div class="stat-card c4 fade-up">
+                <div class="stat-label">Late Complete</div>
+                <div class="stat-value" id="sPending">—</div>
+                <div class="stat-sub">in progress</div>
+            </div>
+        </div>
+
+        <!-- Two-column -->
+        <div class="grid-2">
+
+            <!-- Left: Recent Tasks -->
+            <div>
+                <div class="panel">
+                    <div class="panel-head">
+                        <span class="panel-title">Active Tasks</span>
+                        <a href="/program.html" class="panel-link">View all →</a>
+                    </div>
+                    <div class="task-preview-list" id="taskPreview">
+                        <div class="empty-state">Loading tasks…</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Sidebar panels -->
+            <div style="display:flex; flex-direction:column; gap:20px;">
+
+                <!-- Quick Actions -->
+                <div class="panel">
+                    <div class="panel-head">
+                        <span class="panel-title">Quick Actions</span>
+                    </div>
+                    <div class="action-list">
+                        <a href="/program.html" class="action-item">
+                            <div class="action-icon teal">＋</div>
+                            <div class="action-text">
+                                <strong>New Task</strong>
+                                <span>Add a task with deadline</span>
+                            </div>
+                            <span class="action-arrow">›</span>
+                        </a>
+                        <a href="/program.html" class="action-item">
+                            <div class="action-icon blue">☰</div>
+                            <div class="action-text">
+                                <strong>All Tasks</strong>
+                                <span>Browse and manage tasks</span>
+                            </div>
+                            <span class="action-arrow">›</span>
+                        </a>
+                        <a href="/archive" class="action-item">
+                            <div class="action-icon amber">⊘</div>
+                            <div class="action-text">
+                                <strong>Archive</strong>
+                                <span>Ignored / dismissed tasks</span>
+                            </div>
+                            <span class="action-arrow">›</span>
+                        </a>
+                        <a href="/outdated" class="action-item">
+                            <div class="action-icon red">⏰</div>
+                            <div class="action-text">
+                                <strong>Expired</strong>
+                                <span>Tasks past their deadline</span>
+                            </div>
+                            <span class="action-arrow">›</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Server Info -->
+                <div class="panel">
+                    <div class="panel-head">
+                        <span class="panel-title">Server Info</span>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-row">
+                            <span class="info-key">Status</span>
+                            <span class="badge-sm badge-online">ONLINE</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-key">Address</span>
+                            <span class="info-val">localhost:8080</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-key">Version</span>
+                            <span class="info-val">v1.0.0</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-key">Uptime</span>
+                            <span class="info-val" id="uptimeDisplay">—</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-key">Engine</span>
+                            <span class="info-val">W-Studio</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="footer">© 2026 YP Creation Studio &nbsp;·&nbsp; W-Studio v1.0.0 Engine &nbsp;·&nbsp; Todo LM v1.0</div>
+    </div>
+
+    {{CONTENT}}
+
+    <script>
+        // ─── Uptime counter ───────────────────────────────────────────────
+        const serverStart = Date.now();
+        function updateUptime() {
+            const s = Math.floor((Date.now() - serverStart) / 1000);
+            const h = String(Math.floor(s / 3600)).padStart(2,'0');
+            const m = String(Math.floor((s % 3600) / 60)).padStart(2,'0');
+            const sec = String(s % 60).padStart(2,'0');
+            document.getElementById('uptimeDisplay').textContent = `${h}h ${m}m ${sec}s`;
+        }
+        setInterval(updateUptime, 1000);
+        updateUptime();
+
+        // ─── Load stats & task preview from /stats JSON endpoint ─────────
+        async function loadStats() {
+            try {
+                const res = await fetch('/stats');
+                if (!res.ok) throw new Error('no stats');
+                const d = await res.json();
+
+                document.getElementById('sTotal').textContent    = d.total    ?? '—';
+                document.getElementById('sComplete').textContent = d.complete  ?? '—';
+                document.getElementById('sExpired').textContent  = d.expired   ?? '—';
+                document.getElementById('sPending').textContent  = d.incomplete?? '—';
+
+                const container = document.getElementById('taskPreview');
+                if (!d.active || d.active.length === 0) {
+                    container.innerHTML = '<div class="empty-state">No active tasks. <a href="/program.html" style="color:var(--accent)">Add one →</a></div>';
+                    return;
+                }
+
+                container.innerHTML = d.active.slice(0, 8).map(t => {
+                    const dotClass = {
+                        'Complete': 'dot-complete',
+                        'Expired':  'dot-expired',
+                        'Ignore':   'dot-ignore',
+                    }[t.status] || 'dot-active';
+                    const dateStr = t.start_dt ? t.start_dt.substring(5, 16).replace('T',' ') : '';
+                    return `
+                    <div class="task-row">
+                        <span class="task-dot ${dotClass}"></span>
+                        <span class="task-row-title">${escHtml(t.title)}</span>
+                        <span class="task-row-meta">${escHtml(dateStr)}</span>
+                    </div>`;
+                }).join('');
+            } catch (e) {
+                // Stats endpoint not available — hide stat values gracefully
+                ['sTotal','sComplete','sExpired','sPending'].forEach(id => {
+                    document.getElementById(id).textContent = '—';
+                });
+            }
+        }
+
+        function escHtml(s) {
+            return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        loadStats();
+    </script>
+</body>
+</html>

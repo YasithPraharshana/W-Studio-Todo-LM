@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>W-Studio | Todo LM - Outdate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="icon" href="resource/icon.ico">
+    <style>
+        :root {
+            --bg:      #080a0f;
+            --surface: #0e1117;
+            --card:    #111520;
+            --border:  #1c2030;
+            --accent:  #00d2b4;
+            --danger:  #ff3c5a;
+            --success: #00e896;
+            --warn:    #ffb340;
+            --ignore:  #3a4060;
+            --purple:  #a78bfa;
+            --text-hi:  #eef0f6;
+            --text-mid: #8890aa;
+            --text-dim: #3a4060;
+            --mono: 'JetBrains Mono', monospace;
+            --sans: 'Outfit', sans-serif;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--sans); background: var(--bg); color: var(--text-hi); min-height: 100vh; }
+
+        /* Subtle red-tinted grid — signals "archive / danger zone" feel */
+        body::before {
+            content: ''; position: fixed; inset: 0;
+            background-image:
+                linear-gradient(rgba(255,60,90,.018) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,60,90,.018) 1px, transparent 1px);
+            background-size: 40px 40px; pointer-events: none; z-index: 0;
+        }
+
+        /* Dim glow, top-right */
+        body::after {
+            content: ''; position: fixed; top: -150px; right: -150px;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(255,60,90,.04) 0%, transparent 70%);
+            pointer-events: none; z-index: 0;
+        }
+
+        /* ── Nav ─────────────────────────────────────────────────── */
+        .topbar {
+            position: sticky; top: 0; z-index: 200;
+            background: rgba(8,10,15,.92); backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center;
+            padding: 0 28px; height: 58px; gap: 16px;
+        }
+        .logo { font-family: var(--mono); font-size: 14px; font-weight: 700;
+            color: var(--accent); letter-spacing: 2px; text-decoration: none; }
+        .logo span { color: var(--text-dim); }
+        .topbar-sep { width: 1px; height: 22px; background: var(--border); }
+		.page-label-program { font-family: var(--mono); font-size: 11px;
+            letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; }
+        .page-label { font-family: var(--mono); font-size: 11px;
+            letter-spacing: 2px; color: var(--danger); text-transform: uppercase;
+            display: flex; align-items: center; gap: 8px; }
+        .page-label::before {
+            content: ''; width: 6px; height: 6px; border-radius: 50%;
+            background: var(--danger); flex-shrink: 0;
+        }
+        .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+        .search-wrap { position: relative; display: flex; align-items: center; }
+        .search-wrap svg { position: absolute; left: 10px; color: var(--text-dim); pointer-events: none; }
+        #searchInput {
+            background: var(--card); border: 1px solid var(--border);
+            color: var(--text-hi); font-family: var(--sans); font-size: 13px;
+            padding: 7px 12px 7px 32px; border-radius: 7px; width: 190px;
+            outline: none; transition: border-color .2s;
+        }
+        #searchInput:focus { border-color: var(--danger); }
+        #searchInput::placeholder { color: var(--text-dim); }
+
+        .btn-ghost {
+            font-family: var(--sans); font-size: 13px; font-weight: 500;
+            color: var(--text-mid); background: transparent;
+            padding: 7px 13px; border-radius: 7px;
+            border: 1px solid var(--border); cursor: pointer;
+            transition: all .2s; text-decoration: none; white-space: nowrap;
+        }
+        .btn-ghost:hover { color: var(--accent); border-color: var(--accent); }
+
+        .btn-danger-ghost {
+            font-family: var(--sans); font-size: 13px; font-weight: 500;
+            color: var(--text-dim); background: transparent;
+            padding: 7px 13px; border-radius: 7px;
+            border: 1px solid var(--border); cursor: pointer;
+            transition: all .2s; white-space: nowrap;
+        }
+        .btn-danger-ghost:hover { color: var(--danger); border-color: var(--danger); background: rgba(255,60,90,.06); }
+
+        /* ── Filter Tabs ─────────────────────────────────────────── */
+        .filter-bar {
+            position: relative; z-index: 1;
+            display: flex; align-items: center; gap: 2px;
+            padding: 14px 28px 0;
+            border-bottom: 1px solid var(--border);
+            background: rgba(8,10,15,.6);
+        }
+        .filter-tab {
+            font-family: var(--mono); font-size: 11px; font-weight: 700;
+            letter-spacing: 1.5px; text-transform: uppercase;
+            color: var(--text-dim); background: none;
+            border: none; cursor: pointer;
+            padding: 8px 14px; border-radius: 6px 6px 0 0;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap; transition: all .2s;
+        }
+        .filter-tab:hover { color: var(--text-mid); }
+        .filter-tab.active { color: var(--danger); border-bottom-color: var(--danger); }
+
+        .cnt { display: inline-block; border-radius: 4px; padding: 1px 6px; margin-left: 5px; font-size: 10px; }
+        .filter-tab[data-f="All"]        .cnt { background: rgba(255,60,90,.1);  color: var(--danger); }
+        .filter-tab[data-f="Expired"]    .cnt { background: rgba(255,60,90,.1);  color: var(--danger); }
+        .filter-tab[data-f="Complete"]   .cnt { background: rgba(0,232,150,.12); color: var(--success); }
+        .filter-tab[data-f="Incomplete"] .cnt { background: rgba(167,139,250,.12); color: var(--purple); }
+
+        .filter-tab.active[data-f="Expired"]    { color: var(--danger);  border-bottom-color: var(--danger); }
+        .filter-tab.active[data-f="Complete"]   { color: var(--success); border-bottom-color: var(--success); }
+        .filter-tab.active[data-f="Incomplete"] { color: var(--purple);  border-bottom-color: var(--purple); }
+
+        /* Extra badge styles needed for complete/incomplete on this page */
+        .badge-complete   { background: rgba(0,232,150,.12);  color: var(--success); }
+        .badge-incomplete { background: rgba(167,139,250,.12); color: var(--purple); }
+
+        /* ── Hero Banner ─────────────────────────────────────────── */
+        .archive-banner {
+            position: relative; z-index: 1;
+            background: linear-gradient(135deg, rgba(255,60,90,.06) 0%, transparent 60%);
+            border-bottom: 1px solid rgba(255,60,90,.12);
+            padding: 24px 28px 22px;
+        }
+        .archive-banner-inner { max-width: 1000px; margin: 0 auto; }
+        .archive-eyebrow {
+            font-family: var(--mono); font-size: 10px; letter-spacing: 3px;
+            text-transform: uppercase; color: var(--danger);
+            display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+        }
+        .archive-eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--danger); }
+        .archive-title { font-size: 22px; font-weight: 700; color: var(--text-hi); }
+        .archive-sub { font-size: 13px; color: var(--text-dim); margin-top: 4px; font-weight: 300; }
+
+        /* ── Page ────────────────────────────────────────────────── */
+        .page { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 28px 24px 80px; }
+        .task-list { display: flex; flex-direction: column; gap: 8px; }
+
+        /* ── Task Card ───────────────────────────────────────────── */
+        .task-item {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 10px; overflow: hidden; transition: border-color .2s;
+            opacity: .9;
+        }
+        .task-item:hover { border-color: rgba(255,60,90,.2); opacity: 1; }
+
+        .task-item.Expired    { border-left: 3px solid var(--danger); }
+        .task-item.Ignore     { border-left: 3px solid var(--ignore); opacity: .6; }
+        .task-item.Ignore:hover { opacity: .8; }
+        .task-item.Complete   { border-left: 3px solid var(--success); }
+        .task-item.Incomplete { border-left: 3px solid var(--purple); }
+
+        .task-header {
+            display: grid;
+            grid-template-columns: 18px 1fr 110px 108px 90px 120px;
+            align-items: center; gap: 10px;
+            padding: 14px 18px; cursor: pointer; transition: background .15s;
+        }
+        .task-header:hover { background: rgba(255,255,255,.02); }
+
+        .task-arrow { font-size: 10px; color: var(--text-dim); transition: transform .2s; user-select: none; }
+        .task-item.active .task-arrow { transform: rotate(90deg); color: var(--danger); }
+
+        .task-title { font-size: 14px; font-weight: 600; color: var(--text-mid);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .task-type  { font-family: var(--mono); font-size: 10px;
+            color: var(--text-dim); text-transform: uppercase; }
+
+        .badge { display: inline-block; padding: 3px 9px; border-radius: 5px;
+            font-family: var(--mono); font-size: 10px; font-weight: 700;
+            letter-spacing: .5px; text-align: center; }
+        .badge-expired { background: rgba(255,60,90,.12);  color: var(--danger); }
+        .badge-ignore  { background: rgba(58,64,96,.2);    color: var(--text-dim); }
+		
+		.badge-latecomplete { background: rgba(255,179,64,.12); color: var(--warn); }
+		.task-item.LateComplete { border-left: 3px solid var(--warn); }
+		.filter-tab[data-f="LateComplete"] .cnt { background: rgba(255,179,64,.12); color: var(--warn); }
+		.filter-tab.active[data-f="LateComplete"] { color: var(--warn); border-bottom-color: var(--warn); }
+
+        /* Action buttons */
+        .task-actions { display: flex; gap: 5px; justify-content: flex-end; }
+        .act-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px; border-radius: 6px;
+            text-decoration: none; font-size: 13px; transition: all .15s;
+            cursor: pointer; border: none; background: none;
+        }
+        .act-restore { background: rgba(0,210,180,.1); color: var(--accent); font-size: 14px; }
+        .act-delete  { background: rgba(255,60,90,.08); color: var(--danger); font-size: 12px; }
+        .act-btn:hover { transform: translateY(-1px); filter: brightness(1.4); }
+
+        .task-date { font-family: var(--mono); font-size: 10px; color: var(--text-dim); text-align: right; }
+
+        /* ── Drawer ──────────────────────────────────────────────── */
+        .task-details { max-height: 0; overflow: hidden; transition: max-height .3s ease; background: rgba(0,0,0,.25); }
+        .task-item.active .task-details { max-height: 600px; border-top: 1px solid var(--border); }
+        .task-details-inner { padding: 18px 22px; }
+        .detail-meta { display: flex; gap: 22px; margin-bottom: 12px; flex-wrap: wrap; }
+        .detail-meta-item { font-family: var(--mono); font-size: 11px; }
+        .detail-meta-item .k { color: var(--text-dim); margin-right: 6px; }
+        .detail-meta-item .v { color: var(--text-mid); }
+        .desc-content { font-size: 13px; line-height: 1.75; color: var(--text-mid); white-space: pre-wrap; }
+        .desc-content a { color: var(--accent); }
+        .desc-empty { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+
+        /* ── Info strip below banner ─────────────────────────────── */
+        .info-strip {
+            position: relative; z-index: 1;
+            display: flex; align-items: center; gap: 24px;
+            max-width: 1000px; margin: 0 auto;
+            padding: 12px 24px;
+        }
+        .info-chip {
+            font-family: var(--mono); font-size: 11px; color: var(--text-dim);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .chip-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .chip-dot.expired { background: var(--danger); }
+        .chip-dot.ignore  { background: var(--ignore); }
+
+        /* ── Footer ──────────────────────────────────────────────── */
+        .footer { text-align: center; padding: 40px 0 0;
+            font-family: var(--mono); font-size: 11px;
+            color: var(--text-dim); letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+    <nav class="topbar">
+        <a href="/app.html" class="logo">W<span>-</span>STUDIO</a>
+        <div class="topbar-sep"></div>
+		<span class="page-label-program">Todo LM</span>
+        <span class="page-label">Outdate</span>
+        <div class="topbar-right">
+            <div class="search-wrap">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                </svg>
+                <input type="text" id="searchInput" placeholder="Search archive…" oninput="applyFilter()">
+            </div>
+            <a href="/program.html" class="btn-ghost">← Tasks</a>
+            <a href="/archive" class="btn-ghost">Archive</a>
+            <button class="btn-danger-ghost"
+                onclick="if(confirm('Clear all Expired tasks from outdated? Expired tasks will remain. This cannot be undone.')) window.location='/clear-outdated'">
+                ✕ Clear Outdates
+            </button>
+        </div>
+    </nav>
+
+    <!-- Filter Tabs -->
+    <div class="filter-bar">
+        <button class="filter-tab active" data-f="All"        onclick="setFilter('All',this)">All        <span class="cnt" id="cnt-All">0</span></button>
+        <button class="filter-tab"        data-f="Expired"    onclick="setFilter('Expired',this)">Expired    <span class="cnt" id="cnt-Expired">0</span></button>
+        <button class="filter-tab"        data-f="Complete"   onclick="setFilter('Complete',this)">Complete   <span class="cnt" id="cnt-Complete">0</span></button>
+		<button class="filter-tab" data-f="LateComplete" onclick="setFilter('LateComplete',this)">Late Complete <span class="cnt" id="cnt-LateComplete">0</span>
+</button>
+    </div>
+
+    <!-- Archive Banner -->
+    <div class="archive-banner">
+        <div class="archive-banner-inner">
+            <div class="archive-eyebrow">Expired Tasks</div>
+            <div class="archive-title">Expired Tasks</div>
+            <div class="archive-sub">Tasks that have passed their end deadline. These are protected from Clear All.</div>
+        </div>
+    </div>
+
+    <!-- Legend strip -->
+    <div class="info-strip">
+        <span class="info-chip"><span class="chip-dot expired"></span>Expired — had an end time, now past it</span>
+        <span class="info-chip"><span class="chip-dot" style="background:var(--success)"></span>Complete — finished tasks</span>
+        <span class="info-chip"><span class="chip-dot" style="background:var(--warn)"></span>Late Complete — late finished tasks</span>
+        <span class="info-chip" style="opacity:.5;">Ignored tasks are in <a href="/archive" style="color:var(--danger);text-decoration:none;">Archive →</a></span>
+    </div>
+
+    <div class="page">
+        <div class="task-list" id="taskList">
+            {{CONTENT}}
+        </div>
+        <div class="footer">© 2026 YP Creation Studio &nbsp;·&nbsp; W-Studio v1.0.0 Engine &nbsp;·&nbsp; Todo LM v1.0</div>
+    </div>
+
+    <script>
+        function doAction(url, redirect) {
+            fetch(url).then(() => { window.location.href = redirect; })
+                      .catch(() => { window.location.href = redirect; });
+        }
+
+        let activeFilter = 'All';
+
+        function setFilter(f, btn) {
+            activeFilter = f;
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            applyFilter();
+        }
+
+        function applyFilter() {
+            const q = document.getElementById('searchInput').value.toLowerCase().trim();
+            const items = document.querySelectorAll('.task-item[data-status]');
+            let shown = 0;
+            items.forEach(item => {
+                const status = item.dataset.status;
+                const title  = (item.querySelector('.task-title')?.textContent || '').toLowerCase();
+                const matchF = activeFilter === 'All' || status === activeFilter;
+                const matchS = !q || title.includes(q);
+                const show   = matchF && matchS;
+                item.style.display = show ? '' : 'none';
+                if (show) shown++;
+            });
+            const list = document.getElementById('taskList');
+            const existing = list.querySelector('.js-empty');
+            if (shown === 0 && !existing) {
+                const el = document.createElement('div');
+                el.className = 'js-empty';
+                el.style.cssText = 'text-align:center;padding:60px 20px;color:#3a4060;font-family:monospace;';
+                el.innerHTML = '<div style="font-size:32px;margin-bottom:12px;">◈</div><p>No items match this filter.</p>';
+                list.appendChild(el);
+            } else if (shown > 0 && existing) {
+                existing.remove();
+            }
+        }
+
+        function updateCounts() {
+            const counts = { All: 0, Expired: 0, Complete: 0, LateComplete:0};
+            document.querySelectorAll('.task-item[data-status]').forEach(i => {
+                counts.All++;
+                const s = i.dataset.status;
+                if (counts[s] !== undefined) counts[s]++;
+            });
+            document.getElementById('cnt-All').textContent        = counts.All;
+            document.getElementById('cnt-Expired').textContent    = counts.Expired;
+            document.getElementById('cnt-Complete').textContent   = counts.Complete;
+			document.getElementById('cnt-LateComplete').textContent = counts.LateComplete;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.desc-content').forEach(div => {
+                div.innerHTML = div.innerText.replace(
+                    /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig,
+                    '<a href="$1" target="_blank">$1</a>');
+            });
+            document.querySelectorAll('.task-header').forEach(h => {
+                h.addEventListener('click', e => {
+                    if (e.target.closest('.task-actions')) return;
+                    h.parentElement.classList.toggle('active');
+                });
+            });
+            updateCounts();
+            applyFilter();
+        });
+    </script>
+</body>
+</html>
