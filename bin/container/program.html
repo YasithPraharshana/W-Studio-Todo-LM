@@ -142,7 +142,7 @@
         .filter-tab.active[data-f="Complete"]  { color: var(--success); border-bottom-color: var(--success); }
 
         /* ── Page ────────────────────────────────────────────────── */
-        .page { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 28px 24px 80px; }
+        .page { position: relative; z-index: 1; margin: 0 auto; padding: 28px 24px 80px; }
         .task-list { display: flex; flex-direction: column; gap: 8px; }
 
         /* ── Task Card ───────────────────────────────────────────── */
@@ -160,7 +160,7 @@
 		
         .task-header {
             display: grid;
-            grid-template-columns: 18px 1fr 110px 108px 110px 120px;
+            grid-template-columns: 18px 1fr 90px 95px 100px 250px;
             align-items: center; gap: 10px;
             padding: 14px 18px; cursor: pointer; transition: background .15s;
         }
@@ -170,7 +170,18 @@
         .task-item.active .task-arrow { transform: rotate(90deg); color: var(--accent); }
 
         .task-title { font-size: 14px; font-weight: 600; color: var(--text-hi);
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            cursor: default; }
+        .task-title[title]:hover::after {
+            content: attr(title);
+            position: absolute; left: 48px; top: 100%;
+            background: var(--card); border: 1px solid var(--border);
+            color: var(--text-hi); font-size: 12px; font-weight: 400;
+            padding: 8px 12px; border-radius: 8px; z-index: 100;
+            max-width: 500px; white-space: normal; line-height: 1.5;
+            box-shadow: 0 8px 24px rgba(0,0,0,.5);
+        }
+        .task-header { position: relative; }
         .task-type  { font-family: var(--mono); font-size: 10px;
             color: var(--text-dim); text-transform: uppercase; }
 
@@ -200,7 +211,7 @@
         .act-delete  { background: rgba(255,60,90,.08); color: var(--danger); font-size: 12px; }
         .act-btn:hover { transform: translateY(-1px); filter: brightness(1.4); }
 
-        .task-date { font-family: var(--mono); font-size: 10px; color: var(--text-dim); text-align: right; }
+        .task-date { font-family: var(--mono); font-size: 10.5px; color: var(--text-mid); text-align: right; white-space: nowrap; line-height: 1.4; }
 
         /* ── Drawer ──────────────────────────────────────────────── */
         .task-details { max-height: 0; overflow: hidden; transition: max-height .3s ease; background: rgba(0,0,0,.25); }
@@ -222,8 +233,20 @@
         }
         .modal-card {
             background: var(--card); border: 1px solid var(--border);
-            border-radius: 16px; padding: 28px; width: 90%; max-width: 480px;
+            border-radius: 16px; padding: 28px; width: 95%; max-width: 860px;
             box-shadow: 0 40px 80px rgba(0,0,0,.6);
+        }
+        .modal-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+        .modal-desc textarea {
+            height: 100%;
+            min-height: 260px;
+            resize: vertical;
+            box-sizing: border-box;
         }
         .modal-title { font-family: var(--mono); font-size: 12px;
             letter-spacing: 2px; text-transform: uppercase;
@@ -305,19 +328,31 @@
         <div class="modal-card">
             <div class="modal-title">Create New Task</div>
             <form action="program.html" method="GET">
+                <div class="modal-body">
+                <div class="modal-left">
                 <div class="form-group">
                     <label>Task Title</label>
                     <input type="text" name="title" placeholder="What needs to be done?" required>
                 </div>
                 <div class="form-group">
                     <label>Category</label>
-                    <select name="type">
-                        <option value="Meeting">Meeting</option>
-                        <option value="Project">Project</option>
-                        <option value="Development">Development</option>
-                        <option value="Research">Research</option>
-                        <option value="Other">Other</option>
-                    </select>
+                    <div style="position:relative">
+					  <input type="text" id="catSearch" placeholder="Search category…"
+						oninput="filterCat(this.value)"
+						style="width:100%;padding:10px 12px;background:var(--surface);
+							   border:1px solid var(--border);color:var(--text-hi);
+							   border-radius:7px;font-family:var(--sans);font-size:13px;
+							   outline:none;margin-bottom:4px"
+						onfocus="document.getElementById('catDrop').style.display='block'"
+						onblur="setTimeout(()=>document.getElementById('catDrop').style.display='none',200)">
+					  <input type="hidden" name="type" id="catValue" value="Meeting">
+
+					  <div id="catDrop"
+						style="display:none;position:absolute;z-index:999;width:100%;
+							   max-height:50vh;overflow-y:auto;background:var(--surface);
+							   border:1px solid var(--border);border-radius:7px;top:44px">
+					  </div>
+					</div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -329,10 +364,14 @@
                         <input type="datetime-local" name="end_dt">
                     </div>
                 </div>
-                <div class="form-group">
+                </div><!-- /.modal-left -->
+                <div class="modal-desc">
                     <label>Description / Notes</label>
-                    <textarea name="desc" rows="4" placeholder="Add details, links, context…"></textarea>
-                </div>
+                    <textarea name="desc" placeholder="Add details, links, context…
+
+Links, references, anything useful…"></textarea>
+                </div><!-- /.modal-desc -->
+                </div><!-- /.modal-body -->
                 <input type="hidden" name="sid" id="taskID">
                 <div class="modal-actions">
                     <button type="submit" class="btn-submit">SAVE TASK</button>
@@ -343,6 +382,48 @@
     </div>
 
     <script>
+		const CAT = [
+		  {g:"🎓 Academic & Study",    i:["Lecture","Tutorial","Assignment","Essay","Report","Exam","Quiz","Presentation","Lab Work","Field Work","Thesis","Research Paper","Study Session","Group Study","Revision"]},
+		  {g:"💼 Work & Professional", i:["Meeting","Client Call","Team Standup","Review","Interview","Training","Workshop","Conference","Deadline","Proposal","Audit","Business Trip"]},
+		  {g:"💻 Development & Tech",  i:["Development","Bug Fix","Code Review","Testing","Deployment","Design","Architecture","Database","DevOps","Security Audit","API Integration","Documentation"]},
+		  {g:"🔬 Research & Analysis", i:["Research","Data Analysis","Literature Review","Survey","Experiment","Case Study","Market Research","Competitor Analysis"]},
+		  {g:"🎨 Creative & Design",   i:["Brainstorming","Wireframing","Prototyping","UI Design","Content Writing","Editing","Photography","Video Editing","Graphic Design"]},
+		  {g:"🏥 Health & Wellness",   i:["Doctor Appointment","Medication","Workout","Therapy Session","Health Checkup","Diet Plan"]},
+		  {g:"🏠 Personal & Life",     i:["Errand","Shopping","Bill Payment","Event","Travel","Appointment","Family","Social","Hobby","Volunteering"]},
+		  {g:"📦 Project & Planning",  i:["Project","Planning","Goal Setting","Milestone","Follow-up","Review & Reflect","Other"]}
+		];
+
+		function renderCat(q){
+		  const drop = document.getElementById('catDrop');
+		  drop.innerHTML = '';
+		  CAT.forEach(({g,i})=>{
+			const items = q ? i.filter(x=>x.toLowerCase().includes(q.toLowerCase())) : i;
+			if(!items.length) return;
+			const grp = document.createElement('div');
+			grp.style.cssText='padding:6px 10px 2px;font-size:10px;color:var(--text-dim);font-family:var(--mono);letter-spacing:1px;text-transform:uppercase;border-top:1px solid var(--border)';
+			grp.textContent = g;
+			drop.appendChild(grp);
+			items.forEach(name=>{
+			  const el = document.createElement('div');
+			  el.textContent = name;
+			  el.style.cssText='padding:8px 14px;font-size:13px;cursor:pointer;color:var(--text-hi)';
+			  el.onmouseenter=()=>el.style.background='rgba(0,210,180,.08)';
+			  el.onmouseleave=()=>el.style.background='';
+			  el.onmousedown=()=>{
+				document.getElementById('catValue').value=name;
+				document.getElementById('catSearch').value=name;
+				document.getElementById('catDrop').style.display='none';
+			  };
+			  drop.appendChild(el);
+			});
+		  });
+		}
+
+		function filterCat(q){ renderCat(q); document.getElementById('catDrop').style.display='block'; }
+		document.getElementById('catSearch').addEventListener('focus',()=>renderCat(''));
+		
+		
+	
         // JS-side redirect: fetch the action, then redirect from here (not server)
         function doAction(url, redirect) {
             fetch(url).then(() => { window.location.href = redirect; })
@@ -406,6 +487,15 @@
             });
         }
 
+        // Add tooltip for long titles
+        function initTitleTooltips() {
+            document.querySelectorAll('.task-title').forEach(el => {
+                if (el.scrollWidth > el.clientWidth) {
+                    el.setAttribute('title', el.textContent.trim());
+                }
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             // Linkify descriptions
             document.querySelectorAll('.desc-content').forEach(div => {
@@ -421,6 +511,7 @@
                 });
             });
             updateCounts();
+            initTitleTooltips();
             activateTabFromUrl();
             applyFilter();
         });
