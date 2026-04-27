@@ -171,11 +171,21 @@ std::string nowString() {
 
 // Short display: "MM-DD HH:MM"
 std::string shortDt(const std::string& dt) {
+    // dt format: "YYYY-MM-DDTHH:MM"
     if (dt.size() < 16) return dt;
-    std::string s = dt.substr(5, 11);
-    size_t t = s.find('T');
-    if (t != std::string::npos) s[t] = ' ';
-    return s;
+
+    int year  = std::stoi(dt.substr(0, 4));
+    int month = std::stoi(dt.substr(5, 2));
+    int day   = std::stoi(dt.substr(8, 2));
+    std::string timeStr = dt.substr(11, 5); // "HH:MM"
+
+    const char* months[] = {"Jan","Feb","Mar","Apr","May","Jun",
+                             "Jul","Aug","Sep","Oct","Nov","Dec"};
+    std::string mon = (month >= 1 && month <= 12) ? months[month-1] : "???";
+
+    char buf[32];
+    sprintf(buf, "%s %02d, %d  %s", mon.c_str(), day, year, timeStr.c_str());
+    return std::string(buf);
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -286,13 +296,13 @@ std::string buildTaskCard(const XMLRow& row,
          << "  <div class='detail-meta'>"
          << "    <span class='detail-meta-item'>"
          << "      <span class='k'>START</span>"
-         << "      <span class='v'>" << (start_dt.empty() ? "—" : start_dt) << "</span>"
+         << "      <span class='v'>" << (start_dt.empty() ? "—" : shortDt(start_dt)) << "</span>"
          << "    </span>";
 
     if (!end_dt.empty()) {
         html << "    <span class='detail-meta-item'>"
              << "      <span class='k'>END</span>"
-             << "      <span class='v'>" << end_dt << "</span>"
+             << "      <span class='v'>" << shortDt(end_dt) << "</span>"
              << "    </span>";
     }
 
@@ -440,8 +450,16 @@ DWORD WINAPI runServer(LPVOID lpParam) {
     }
     AddLog("Server listening on http://localhost:8080");
 
-    XMLDatabase db("container/master_db.xml");
+    char exePath[MAX_PATH];
+    GetModuleFileNameA(NULL, exePath, MAX_PATH);
+    std::string exeDir(exePath);
+    exeDir = exeDir.substr(0, exeDir.find_last_of("\\/"));
+    std::string dbPath = exeDir + "\\container\\master_db.xml";
+
+    XMLDatabase db(dbPath);
     db.createTable("Tasks", "tid");
+    AddLog(("DB path: " + dbPath).c_str());
+
 
     while (running) {
         SOCKET sock = accept(server_fd, (struct sockaddr*)&client, &c);
@@ -480,7 +498,7 @@ DWORD WINAPI runServer(LPVOID lpParam) {
                         if (row.pk_value != id) continue;
                         std::vector<XMLField> upd;
                         for (const auto& f : row.fields)
-                            upd.push_back({f.name, f.name == "status" ? ns : f.value});
+                            { XMLField xf; xf.name = f.name; xf.value = (f.name == "status") ? ns : f.value; upd.push_back(xf); }
                         db.update("Tasks", id, upd);
                         AddLog(("Updated: " + id + " → " + ns).c_str());
                         break;
@@ -637,12 +655,12 @@ DWORD WINAPI runServer(LPVOID lpParam) {
             if (params.count("title") && !params["title"].empty() &&
                 params.count("sid")   && !params["sid"].empty()) {
                 std::vector<XMLField> f;
-                f.push_back({"title",    params["title"]});
-                f.push_back({"type",     params.count("type")     ? params["type"]     : ""});
-                f.push_back({"desc",     params.count("desc")     ? params["desc"]     : ""});
-                f.push_back({"start_dt", params.count("start_dt") ? params["start_dt"] : ""});
-                f.push_back({"end_dt",   params.count("end_dt")   ? params["end_dt"]   : ""});
-                f.push_back({"status",   "Incomplete"});
+                { XMLField xf; xf.name="title"; xf.value=params["title"]; f.push_back(xf); }
+                { XMLField xf; xf.name="type"; xf.value=params.count("type")?params["type"]:""; f.push_back(xf); }
+                { XMLField xf; xf.name="desc"; xf.value=params.count("desc")?params["desc"]:""; f.push_back(xf); }
+                { XMLField xf; xf.name="start_dt"; xf.value=params.count("start_dt")?params["start_dt"]:""; f.push_back(xf); }
+                { XMLField xf; xf.name="end_dt"; xf.value=params.count("end_dt")?params["end_dt"]:""; f.push_back(xf); }
+                { XMLField xf; xf.name="status"; xf.value="Incomplete"; f.push_back(xf); }
                 db.insert("Tasks", params["sid"], f);
                 AddLog(("New task: " + params["title"]).c_str());
             }
