@@ -1,58 +1,52 @@
-# W-Studio - Todo List Manager (Todo LM) 🚀
+# W-Studio - Todo List Manager (Todo LM) 📝
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
 ![Engine](https://img.shields.io/badge/Engine-W--Studio-orange.svg)
 
-**W-Studio Todo List Manager** යනු කාර්යක්ෂමතාව ඉහළ නැංවීම සඳහා නිර්මාණය කරන ලද සැහැල්ලු (Lightweight) සහ වේගවත් මෘදුකාංගයකි. මෙය **W-Studio Engine** මගින් බලගන්වා ඇති අතර, දෛනික කාර්යයන් වඩාත් ක්‍රමවත්ව කළමනාකරණය කිරීමට උපකාරී වේ.
+---
+
+## 🇺🇸 English
+
+### Overview
+**W-Studio Todo List Manager** is a lightweight, high-performance productivity tool built on the **W-Studio Engine**. Designed by **Yasith Praharshana** at **YP Creation Studio**, this application aims to simplify daily task management with a clean and efficient interface.
+
+### Key Features
+* **W-Studio Core:** Fast and reliable task processing.
+* **Minimalist UI:** Clean design for maximum focus.
+* **Installer Included:** Easy installation process for Windows.
+* **Open Source:** Licensed under MIT for community growth.
+
+### Installation
+1.  Go to the [Releases](https://github.com/YasithPraharshana/W-Studio-Todo-LM/releases) page.
+2.  Download `WStudio_Todo_LM_Setup.exe`.
+3.  Run the installer and follow the setup wizard.
+
+### License
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## ✨ ප්‍රධාන අංග (Key Features)
+## 🇱🇰 සිංහල
 
-* **W-Studio Engine Core:** ඉහළ වේගයක් සහ ස්ථාවරත්වයක් ලබා දෙයි.
-* **Simple & Clean UI:** අවධානය වෙනතකට යොමු නොවන සරල පරිශීලක අතුරුමුහුණත.
-* **Easy Installation:** Inno Setup මගින් සැකසූ වෘත්තීය මට්ටමේ ඉන්ස්ටෝලරය.
-* **Task Organization:** පහසුවෙන් ලිස්ට් සැකසීම සහ කළමනාකරණය.
+### දළ විශ්ලේෂණය
+**W-Studio Todo List Manager** යනු **W-Studio Engine** මත පදනම්ව නිර්මාණය කරන ලද සැහැල්ලු සහ වේගවත් මෘදුකාංගයකි. **YP Creation Studio** හි **යසිත් ප්‍රහර්ෂණ** විසින් නිර්මාණය කරන ලද මෙමඟින් ඔබේ දෛනික වැඩකටයුතු වඩාත් පහසුවෙන් සහ සංවිධානාත්මකව කළමනාකරණය කර ගැනීමට අවස්ථාව සැලසේ.
 
----
+### ප්‍රධාන අංග
+* **W-Studio Core:** ඉතා වේගවත් කාර්ය සාධනය.
+* **සරල අතුරුමුහුණත:** වැඩකටයුතු කෙරෙහි වැඩි අවධානයක් යොමු කිරීමට හැකිවන ලෙස නිර්මාණය කර ඇත.
+* **පහසු ස්ථාපනය:** Windows සඳහාම වෙන්වූ installer එකක් ඇතුළත් වේ.
+* **විවෘත මූලාශ්‍ර:** MIT බලපත්‍රය යටතේ ඕනෑම අයෙකුට භාවිත කළ හැක.
 
-## 🛠️ ස්ථාපනය කරන්නේ කෙසේද? (Installation)
-
-1.  **Releases** ටැබ් එකට ගොස් නවතම `WStudio_Todo_LM_Setup.exe` ගොනුව බාගත (Download) කරගන්න.
-2.  බාගත කරගත් `.exe` ගොනුව මත Double-click කර ඉන්ස්ටෝලරය විවෘත කරන්න.
-3.  තිරය මත දිස්වන උපදෙස් අනුගමනය කර ස්ථාපනය සම්පූර්ණ කරන්න.
-
----
-
-## 💻 තාක්ෂණික විස්තර (Technical Details)
-
-* **Developer:** Yasith Praharshana
-* **Studio:** YP Creation Studio
-* **Programming:** C++ / W-Studio Framework
-* **Architecture:** x64
-* **Installer Type:** Inno Setup (lzma compression)
+### ස්ථාපනය කරන ආකාරය
+1.  [Releases](https://github.com/YasithPraharshana/W-Studio-Todo-LM/releases) පිටුවට පිවිසෙන්න.
+2.  `WStudio_Todo_LM_Setup.exe` ගොනුව බාගත (Download) කරගන්න.
+3.  එම ගොනුව විවෘත කර ස්ථාපනය (Install) කරගන්න.
 
 ---
 
-## 📄 බලපත්‍රය (License)
-
-මෙම මෘදුකාංගය **MIT License** යටතේ නිකුත් කර ඇත. වැඩි විස්තර සඳහා [LICENSE](LICENSE) ගොනුව බලන්න.
-
-Copyright (c) 2026 **YP Creation Studio**. All rights reserved.
+## 👨‍💻 Developer
+**Yasith Praharshana** Founder of **YP Creation Studio**
 
 ---
-
-## 🤝 දායකත්වය (Contribution)
-
-ඔබ මෙම මෘදුකාංගය වැඩිදියුණු කිරීමට කැමති නම්:
-1. මෙම Repository එක **Fork** කරන්න.
-2. ඔබේ වෙනස්කම් සිදුකර **Pull Request** එකක් එවන්න.
-
----
-
-### Contact & Support
-Developed by **Yasith Praharshana**. For any inquiries, feel free to reach out via GitHub Issues.
-
----
-*Thank you for using W-Studio Todo LM!*
+© 2026 YP Creation Studio. All Rights Reserved.
