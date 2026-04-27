@@ -1,0 +1,45 @@
+============================================================
+                   SOFTWARE LICENSE AGREEMENT
+            W-STUDIO ENGINE - TODO LIST MANAGER (LM)
+============================================================
+Developer: Yasith Praharshana
+Company: YP Creation Studio
+Software Engine: W-Studio
+Current Application: Todo List Manager (Todo LM)
+Copyright (c) 2026 YP Creation Studio. All rights reserved.
+
+PLEASE READ THIS CAREFULLY. BY INSTALLING THE SOFTWARE, YOU
+AGREE TO THE FOLLOWING MIT-BASED TERMS:
+
+1. GRANT OF PERMISSION
+Permission is granted to any user to use this application for 
+personal, professional, or educational purposes. You may freely 
+distribute the original installer.
+
+2. OPEN SOURCE & MODIFICATION
+This application is powered by the W-Studio Engine. While the 
+distributed version is free for use, the source code is subject 
+to the MIT License terms. You are permitted to modify and adapt 
+the code provided that the original copyright notice of 
+YP Creation Studio and Yasith Praharshana is maintained.
+
+3. PROPRIETARY RIGHTS
+W-Studio and Todo LM remain the intellectual property of 
+Yasith Praharshana and YP Creation Studio. All trademarks and 
+brand identifiers associated with W-Studio are protected.
+
+4. DISCLAIMER (AS-IS)
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. 
+IN NO EVENT SHALL THE DEVELOPER OR YP CREATION STUDIO BE LIABLE 
+FOR ANY CLAIM, DAMAGES, OR DATA LOSS ARISING FROM THE USE OF 
+THIS SOFTWARE.
+
+5. TERMINATION
+Failure to maintain the original copyright notices or any 
+violation of these simplified terms will result in the 
+immediate termination of your license to use the software.
+
+============================================================
+           THANK YOU FOR SUPPORTING YP CREATION STUDIO
+            FOR UPDATES: [Your GitHub/Website Link]
+============================================================
